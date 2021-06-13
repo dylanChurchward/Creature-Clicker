@@ -5,31 +5,48 @@ import javax.swing.ImageIcon;
  * @author Dylan
  *
  */
-
-
 public abstract class Monster {
 
-	private static int HEALTH_POINTS;
+	/**
+	 * The health points that this monster starts with. 
+	 */
+	private final int myHealthPoints;
 	
-	private static int REFRESH_RATE_IN_MS;
+	/**
+	 * The refresh rate in milliseconds used for animating the creature. 
+	 */
+	private final int myRefreshRate;
 	
-	
-	
+	/**
+	 * Constructor for the Monster abstract class. 
+	 * @param theHealthPoints desired health points for this monster. 
+	 * @param theRefreshRate desired refresh rate for this monster. 
+	 */
 	public Monster(final int theHealthPoints, final int theRefreshRate) {
-		HEALTH_POINTS = theHealthPoints;
-		REFRESH_RATE_IN_MS = theRefreshRate;
+		myHealthPoints = theHealthPoints;
+		myRefreshRate = theRefreshRate;
 	}
 	
-	
+	/**
+	 * Returns the total health points for this creature. 
+	 * @return total health points of this creature. 
+	 */
 	public int getHealthPoints() {
-		return HEALTH_POINTS;
+		return myHealthPoints;
 	}
 	
+	/**
+	 * Returns the animation refresh rate for this creature. 
+	 * @return animation refresh rate for this creature. 
+	 */
 	public int getRefreshRate() {
-		return REFRESH_RATE_IN_MS;
+		return myRefreshRate;
 	}
 	
+	/**
+	 * 
+	 * @return the next ImageIcon in the set of ImageIcons that make up
+	 * this creatures animation cycle. 
+	 */
 	public abstract ImageIcon getNextFrame();
-	
-	
 }

@@ -14,7 +14,7 @@ public class DisplayFrame extends JFrame{
 		FightPanel fightPanel = new FightPanel();
 		//fightPanel.setNewMonster(new Gleeb());
 		pack();
-		setTitle("Dungeon Clicker");
+		setTitle("Creature Clicker");
 		setSize(515, 738);
 		setResizable(false);
 		setVisible(true);

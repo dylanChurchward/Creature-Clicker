@@ -8,22 +8,28 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
+/**
+ * Represents a creature named Gleeb. 
+ * @author Dylan 
+ *
+ */
+
 public class Gleeb extends Monster {
 	
-	// Storage for the image files
+	// Storage for the image files use for this creatures animation cycle. 
 	private Map<Integer, ImageIcon> myIcons;
 
-	// The images get shuffled around these variables in order to set/get them effectively
+	// The images get shuffled around these variables in order to set/get 
+	// them effectively.
 	private BufferedImage myBufferedImage;
 	private Image myImage;
 	private ImageIcon myOutputFrame;
 	private int frameCount = 8;
 	
 	/**
-	 * @param int - HealthPoints
-	 * @param int - Refresh rate for animation in milliseconds
+	 * Constructor for the Gleeb creature class. 
 	 */
-	public Gleeb() {
+	public Gleeb() { 
 		super(100, 80);
 		myIcons = new HashMap<>();
 		loadFrames();
@@ -33,7 +39,7 @@ public class Gleeb extends Monster {
 	 * Loads the image files associated with this Monster into ImageIcons, loads the ImageIcons into myIcons map.
 	 * @throws IOException - If the image files cannot be found
 	 */
-	public void loadFrames() {
+	private void loadFrames() {
 		final int monsterSizeInPixels = 345;
 		final int numberOfImages = 8;
 		
@@ -52,8 +58,7 @@ public class Gleeb extends Monster {
 		}
 	}
 	
-	
-	// Selects and returns the next image frame for animation 
+	// Selects and returns the next image frame for the animation cycle.
 	@Override
 	public ImageIcon getNextFrame() {
 		myOutputFrame = myIcons.get(frameCount);
@@ -61,9 +66,5 @@ public class Gleeb extends Monster {
 		if (frameCount > myIcons.size()) frameCount = 1;
 		return myOutputFrame;
 	}
-
-
-
-	
 
 }

@@ -21,16 +21,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import Creatures.CreatureList;
+import Creatures.CreatureNode;
+
 public class FightPanel extends JPanel implements MouseListener{
 
 	// JPanels like to be serialized
 	private static final long serialVersionUID = 1L;
 	
-	
 	private Image myImage;
-	private Monster myMonster;
+	private CreatureNode myCreature;
 	private ImageIcon myBackground;
-	private ImageIcon myMonsterImageIcon;
+	private ImageIcon myCreatureImageIcon;
 	private Timer myTimer;
 	private Timer myTimer2;
 	int startButtonCounter;
@@ -44,9 +46,7 @@ public class FightPanel extends JPanel implements MouseListener{
 	private int timerBarYCoordinate = 85;
 	private int timerBarHeight = 530;
 	private boolean barsEnabled = false;
-	private String startButtonText = "Start";
-	private boolean showClickAnimation = false;
-	private Point clickLocation;
+	private String play = "Play";
 	
 	private Map<String, JButton> myButtons;
 	
@@ -69,10 +69,10 @@ public class FightPanel extends JPanel implements MouseListener{
 		myButtons = new HashMap<>();
 		setupButtons();
 		myPlayer = new UserProfile();
+		CreatureList cl = new CreatureList(); 
+		deployCreature(cl.getFront());
 	}
 
-	
-	
 	// Displays the background, Monster animation, and status bars on the JPanel
 	@Override
 	public void paintComponent(Graphics g) {
@@ -82,8 +82,8 @@ public class FightPanel extends JPanel implements MouseListener{
 		myBackground.paintIcon(this, g, 0, 0);
 		
 		// Paints the current animation frame
-		if (myMonsterImageIcon != null) {
-		 myMonsterImageIcon.paintIcon(this, g, 75, 185);
+		if (myCreatureImageIcon != null) {
+		 myCreatureImageIcon.paintIcon(this, g, 75, 185);
 		}
 		
 		
@@ -96,33 +96,23 @@ public class FightPanel extends JPanel implements MouseListener{
 			g.setColor(Color.white);
 			g.fillRect(436, timerBarYCoordinate, 54, timerBarHeight);
 		}
-		
-		if (showClickAnimation) {
-			g.setColor(Color.red);
-			//g.fillOval((int) clickLocation.getY() - 183, (int) clickLocation.getY() - 183, 15, 15);
-			g.setFont(new Font("Helvetica", Font.BOLD, 30));
-			g.drawString(String.valueOf(myPlayer.getCurrentDamage()), (int) clickLocation.getX() - 715, (int) clickLocation.getY() - 183);
-			
-
-		}
-		
 	}
 	
 	/**
 	 * Scales the health of the monster and the attack damage of the player to match the pixel size of the green health bar. 
 	 */
 	public void scaleDamage() {
-		final int percentage = 605 / myMonster.getHealthPoints();
+		final int percentage = 605 / myCreature.getMyHealthPoints();
 		scaledAttackDamage = myPlayer.getCurrentDamage() * percentage;
 	}
 	
 	/**
 	 *  Action Listener class that works with myTimer to paint animation frames. Each time this action listener is called, it generates the next animation frame.  
 	 */
-	private class MonsterAnimator implements ActionListener {
+	private class CreatureAnimator implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			myMonsterImageIcon = myMonster.getNextFrame();
+			myCreatureImageIcon = myCreature.getNextFrame();
 			repaint();
 			revalidate();
 		}
@@ -133,35 +123,24 @@ public class FightPanel extends JPanel implements MouseListener{
 		public void actionPerformed(ActionEvent e) {
 			timerBarYCoordinate += 1;
 			timerBarHeight -= 1;
-			if (timerBarYCoordinate > 615) dismisMonster();
+			if (timerBarYCoordinate > 615) deployCreature(myCreature);
 			repaint();
 			revalidate();
 		}
 	}
-	
-	private class clickAnimator implements ActionListener {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			
-		}
-	}
-
-	
-	
-	
 	
 	/**
 	 * Creates all of the buttons and their respective action listeners. 
 	 */
 	public void setupButtons() {
 		
-		// Start or "Play" button setup
-		final JButton startButton = new JButton(startButtonText);
+		// Play button setup
+		final JButton startButton = new JButton(play);
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent theEvent) {
 				// This is called when the Start Button is pressed while in "Start" mode
 				if (startButtonCounter % 2 == 0) {
-					start();
+					play();
 				// This is called when the Start Button is pressed while in "Stop" mode
 				} else {
 					pause();
@@ -179,89 +158,46 @@ public class FightPanel extends JPanel implements MouseListener{
 		startButton.setEnabled(false);
 		add(startButton);
 		
-		myButtons.put("Start", startButton);
-		
-		//
-		JFrame monsterMenu = new JFrame("Monsters");
-		monsterMenu.setSize(300, 300);
-		monsterMenu.setResizable(false);
-		monsterMenu.setLayout(new GridLayout(3, 3));
-		monsterMenu.setVisible(false);
-		monsterMenu.setLocationRelativeTo(null);
-		monsterMenu.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		final JButton monsterSelectionButton = new JButton("Monsters");
-		monsterSelectionButton.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent theEvent) {
-				monsterMenu.setVisible(true);
-				pause();
-			}
-		});
-		monsterSelectionButton.setBackground(Color.DARK_GRAY);
-		monsterSelectionButton.setForeground(Color.white);
-		monsterSelectionButton.setBounds(9, 8, 100, 65);
-		add(monsterSelectionButton);
-		
-		
-		/**
-		 * Buttons on the Monster Selection JFrame
-		 */
-		
-		// Gleeb Button
-		final JButton gleebButton = new JButton();
-		try { // Loads gleeb icon image for the monster menu.
-			BufferedImage myBufferedImage = ImageIO.read(new File("src/images/Gleeb Idle1.png"));
-			Image gleebIcon = myBufferedImage.getScaledInstance(60, 70, 0);
-			gleebButton.setIcon(new ImageIcon(gleebIcon));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		gleebButton.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent theEvent) {
-				deployMonster(new Gleeb());
-				monsterMenu.setVisible(false);
-			}
-		});
-		monsterMenu.add(gleebButton);
-		
+		myButtons.put(play, startButton);
 	}
 	
 	/**
 	 * Sets the input monster as the focus of the fight panel.
-	 * @param theMonster
+	 * @param theCreature
 	 */
-	public void deployMonster(final Monster theMonster) {
-		if (myMonster != null) dismisMonster();
-		myMonster = theMonster;
-		myMonsterImageIcon = theMonster.getNextFrame();
-		myTimer = new Timer(theMonster.getRefreshRate(), new MonsterAnimator());
+	public void deployCreature(final CreatureNode theCreature) {
+		if (myCreature != null) dismisCreature();
+		myCreature = theCreature;
+		myCreatureImageIcon = theCreature.getNextFrame();
+		myTimer = new Timer(theCreature.getMyRefreshRate(), new CreatureAnimator());
 		myTimer2 = new Timer(25, new TimerBarAnimator());
 		scaleDamage();
 		barsEnabled = true;
 		repaint();
 		revalidate();
-		myButtons.get("Start").setEnabled(true);
+		myButtons.get(play).setEnabled(true);
 	}
 	
 	/**
 	 * Removes the current monster from the focus of the fight panel.
 	 */
-	public void dismisMonster() {
-		myMonster = null;
-		myMonsterImageIcon = null;
+	public void dismisCreature() {
+		myCreature = null;
+		myCreatureImageIcon = null;
 		myTimer.stop();
 		myTimer2.stop();
-		myButtons.get("Start").setText("Start");
+		myButtons.get("Play").setText(play);
 		startButtonCounter = 0;
 		barsEnabled = false;
 		healthBarYCoordinate = 85;
 		healthBarHeight = 530;
 		timerBarYCoordinate = 85;
 		timerBarHeight = 530;
-		myButtons.get("Start").setEnabled(false);
+		myButtons.get(play).setEnabled(false);
 	}
 	
-	public void start() {
-		myButtons.get("Start").setText("Pause");
+	public void play() {
+		myButtons.get(play).setText("Pause");
 		myTimer.start();
 		myTimer2.start();
 		startButtonCounter++;
@@ -271,7 +207,7 @@ public class FightPanel extends JPanel implements MouseListener{
 		if (myTimer != null) myTimer.stop();
 		if (myTimer2 != null) myTimer2.stop();
 		if (startButtonCounter % 2 == 0) startButtonCounter++;
-		myButtons.get("Start").setText("Start");
+		myButtons.get("Play").setText("Play");
 		startButtonCounter++;
 	}
 	
@@ -287,12 +223,9 @@ public class FightPanel extends JPanel implements MouseListener{
 			healthBarYCoordinate = healthBarYCoordinate + scaledAttackDamage;
 			healthBarHeight -= scaledAttackDamage;
 			
-			showClickAnimation = true;
-			clickLocation = e.getLocationOnScreen();
-			
 			// Stops the monster animation and resets health bar when the monster is defeated. 
 			if (healthBarYCoordinate > 615) {
-				dismisMonster();
+				deployCreature(myCreature.getMySuccesor());
 			}
 			repaint();
 			revalidate();
@@ -305,7 +238,6 @@ public class FightPanel extends JPanel implements MouseListener{
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		showClickAnimation = false;
 		repaint();
 		revalidate();
 	}
@@ -317,7 +249,5 @@ public class FightPanel extends JPanel implements MouseListener{
 	@Override
 	public void mouseExited(MouseEvent e) {
 	}
-	
-	
 	
 }
