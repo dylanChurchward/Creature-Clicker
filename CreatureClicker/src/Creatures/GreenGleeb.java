@@ -13,7 +13,7 @@ public class GreenGleeb extends CreatureNode{
 	/**
 	 * Standard health points for the Green Gleeb.
 	 */
-	private static int HEALTH_POINTS = 100;
+	private static int HEALTH_POINTS = 50;
 	
 	/**
 	 * Standard refresh rate for the Green Gleeb. 
@@ -71,6 +71,12 @@ public class GreenGleeb extends CreatureNode{
 	}
 	
 	@Override
+	public void reset() {
+		frameCount = 0;
+	}
+	
+	
+	@Override
 	public ImageIcon getNextFrame() {
 		myOutputFrame = myIcons[frameCount];
 		frameCount++;
@@ -78,10 +84,6 @@ public class GreenGleeb extends CreatureNode{
 		return myOutputFrame;
 	}
 
-	public static void main(String[] args) {
-		GreenGleeb g = new GreenGleeb(); 
-		for (int i = 0; i < 1000; i++) {
-			g.getNextFrame();
-		}
-	}
+
+
 }

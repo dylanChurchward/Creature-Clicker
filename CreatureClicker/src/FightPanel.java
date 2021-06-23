@@ -35,8 +35,6 @@ public class FightPanel extends JPanel implements MouseListener{
 	private ImageIcon myCreatureImageIcon;
 	private Timer myTimer;
 	private Timer myTimer2;
-	int startButtonCounter;
-	
 	private UserProfile myPlayer;
 	private int scaledAttackDamage;
 	
@@ -47,6 +45,11 @@ public class FightPanel extends JPanel implements MouseListener{
 	private int timerBarHeight = 530;
 	private boolean barsEnabled = false;
 	private String play = "Play";
+	
+	// used to toggle repeat on and off
+	private boolean repeat = false; 
+	private boolean start = false;
+	private boolean auto = false;
 	
 	private Map<String, JButton> myButtons;
 	
@@ -123,9 +126,12 @@ public class FightPanel extends JPanel implements MouseListener{
 		public void actionPerformed(ActionEvent e) {
 			timerBarYCoordinate += 1;
 			timerBarHeight -= 1;
-			if (timerBarYCoordinate > 615) deployCreature(myCreature);
 			repaint();
 			revalidate();
+			if (timerBarYCoordinate > 615) {
+				pause();
+				deployCreature(myCreature);
+			}
 		}
 	}
 	
@@ -135,30 +141,93 @@ public class FightPanel extends JPanel implements MouseListener{
 	public void setupButtons() {
 		
 		// Play button setup
-		final JButton startButton = new JButton(play);
-		startButton.addActionListener(new ActionListener() {
+		final JButton playButton = new JButton(play);
+		playButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent theEvent) {
-				// This is called when the Start Button is pressed while in "Start" mode
-				if (startButtonCounter % 2 == 0) {
+				start = !start;
+				if (start) {
 					play();
 				// This is called when the Start Button is pressed while in "Stop" mode
 				} else {
 					pause();
 				}
 				// Avoids possible negative int issues
-				if (startButtonCounter == 10000) {
-					startButtonCounter = 0;
-				}
 				barsEnabled = true;
 			}
 		});
-		startButton.setBackground(Color.DARK_GRAY);
-		startButton.setForeground(Color.white);
-		startButton.setBounds(210, 8, 80, 65);
-		startButton.setEnabled(false);
-		add(startButton);
+		playButton.setBackground(Color.DARK_GRAY);
+		playButton.setForeground(Color.white);
+		playButton.setBounds(210, 8, 80, 65);
+		playButton.setEnabled(true);
+		add(playButton);
+		myButtons.put(play, playButton);
 		
-		myButtons.put(play, startButton);
+		// When enabled, allows the user to battle the same creature repeatedly
+		final JButton repeatButton = new JButton("Repeat");
+		repeatButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent theEvent) {
+				repeat = !repeat;
+				if (repeat) {
+					repeatButton.setForeground(Color.green);
+				} else {
+					repeatButton.setForeground(Color.white);
+				}
+			}
+		});
+		repeatButton.setBackground(Color.DARK_GRAY);
+		repeatButton.setForeground(Color.white);
+		repeatButton.setBounds(392, 8, 98, 65);
+		repeatButton.setEnabled(true);
+		add(repeatButton);
+		
+		// Move focus to the next creature in the list if it is available to the user. (If they have beaten the current creature).
+		final JButton nextButton = new JButton("Next >>");
+		nextButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent theEvent) {
+				if (myCreature.getMySuccesor() != null && myCreature.getMySuccesor().getMyAvailabilty() != false) {
+					deployCreature(myCreature.getMySuccesor());
+				}
+			}
+		});
+		nextButton.setBackground(Color.DARK_GRAY);
+		nextButton.setForeground(Color.white);
+		nextButton.setBounds(299, 8, 79, 65);
+		nextButton.setEnabled(true);
+		add(nextButton);
+
+		// Move focus to the next creature in the list if it is available to the user.
+		// (If they have beaten the current creature).
+		final JButton previousButton = new JButton("<< Prev");
+		previousButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent theEvent) {
+				if (myCreature.getMyPredecessor() != null) {
+					deployCreature(myCreature.getMyPredecessor());
+				} 
+			}
+		});
+		previousButton.setBackground(Color.DARK_GRAY);
+		previousButton.setForeground(Color.white);
+		previousButton.setBounds(122, 8, 79, 65);
+		previousButton.setEnabled(true);
+		add(previousButton);
+		
+		// Automatically starts the next creature battle without having to press the start button. 
+		final JButton autoButton = new JButton("Auto");
+		autoButton.addActionListener(new ActionListener() {
+			public void actionPerformed(final ActionEvent theEvent) {
+				auto = !auto;
+				if (auto) {
+					autoButton.setForeground(Color.green);
+				} else {
+					autoButton.setForeground(Color.white);
+				}
+			}
+		});
+		autoButton.setBackground(Color.DARK_GRAY);
+		autoButton.setForeground(Color.white);
+		autoButton.setBounds(10, 8, 100, 65);
+		autoButton.setEnabled(true);
+		add(autoButton);
 	}
 	
 	/**
@@ -182,12 +251,14 @@ public class FightPanel extends JPanel implements MouseListener{
 	 * Removes the current monster from the focus of the fight panel.
 	 */
 	public void dismisCreature() {
+		myCreature.reset();
 		myCreature = null;
 		myCreatureImageIcon = null;
 		myTimer.stop();
 		myTimer2.stop();
 		myButtons.get("Play").setText(play);
-		startButtonCounter = 0;
+		myButtons.get("Play").setForeground(Color.white);
+		start = false;
 		barsEnabled = false;
 		healthBarYCoordinate = 85;
 		healthBarHeight = 530;
@@ -197,35 +268,52 @@ public class FightPanel extends JPanel implements MouseListener{
 	}
 	
 	public void play() {
+		myButtons.get(play).setForeground(Color.green);
 		myButtons.get(play).setText("Pause");
 		myTimer.start();
 		myTimer2.start();
-		startButtonCounter++;
+		start = true;
 	}
 	
 	public void pause() {
 		if (myTimer != null) myTimer.stop();
 		if (myTimer2 != null) myTimer2.stop();
-		if (startButtonCounter % 2 == 0) startButtonCounter++;
+		myButtons.get(play).setForeground(Color.white);
 		myButtons.get("Play").setText("Play");
-		startButtonCounter++;
+		start = false;
 	}
 	
-	
+	private void chooseCreature() {
+		if (repeat) {
+			deployCreature(myCreature);
+		} else if (myCreature.getMySuccesor() != null) {
+			deployCreature(myCreature.getMySuccesor());
+		} else if (myCreature.getMySuccesor() == null) {
+			dismisCreature();
+			auto = false;
+			repeat = false;
+			start = false;
+		}
+		if (auto) {
+			play();
+		}
+	}
 	
 	/**\
-	 * The mouse clicked event. Used as an "attack" against the Monster currently in focus.  
+	 * The mouse clicked event. Used as an "attack" against the Creature currently in focus.  
 	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		// Only notices mouse clicks when the Start Button is activated. 
-		if (startButtonCounter % 2 != 0) {
+		if (start) {
 			healthBarYCoordinate = healthBarYCoordinate + scaledAttackDamage;
 			healthBarHeight -= scaledAttackDamage;
 			
-			// Stops the monster animation and resets health bar when the monster is defeated. 
 			if (healthBarYCoordinate > 615) {
-				deployCreature(myCreature.getMySuccesor());
+				if (myCreature.getMySuccesor() != null) {
+					myCreature.getMySuccesor().setMyAvailabilty(true);
+				}
+				chooseCreature();
 			}
 			repaint();
 			revalidate();
@@ -238,8 +326,6 @@ public class FightPanel extends JPanel implements MouseListener{
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		repaint();
-		revalidate();
 	}
 
 	@Override

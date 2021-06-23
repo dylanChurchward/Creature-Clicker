@@ -60,6 +60,12 @@ public abstract class CreatureNode {
 	 */
 	protected abstract void loadAnimationFrames();
 	
+	/**
+	 * Resets the animation frame count to zero, essentially resetting the animation to its starting point 
+	 */
+	public abstract void reset();
+	
+	
 	// Getters 
 	
 	/**

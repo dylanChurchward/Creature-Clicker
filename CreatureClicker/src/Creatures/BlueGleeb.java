@@ -13,7 +13,7 @@ public class BlueGleeb extends CreatureNode{
 	/**
 	 * Standard health points for the Green Gleeb.
 	 */
-	private static int HEALTH_POINTS = 300;
+	private static int HEALTH_POINTS = 140;
 	
 	/**
 	 * Standard refresh rate for the Green Gleeb. 
@@ -29,7 +29,7 @@ public class BlueGleeb extends CreatureNode{
 	 * As it is the first creature, the Green Gleeb starts out
 	 * as available. 
 	 */
-	private static boolean AVAILABILITY = true;
+	private static boolean AVAILABILITY = false;
 	
 	// The images get shuffled around these variables in order to set/get
 	// them effectively.
@@ -71,6 +71,11 @@ public class BlueGleeb extends CreatureNode{
 	}
 	
 	@Override
+	public void reset() {
+		frameCount = 0;
+	}
+	
+	@Override
 	public ImageIcon getNextFrame() {
 		myOutputFrame = myIcons[frameCount];
 		frameCount++;
@@ -78,10 +83,4 @@ public class BlueGleeb extends CreatureNode{
 		return myOutputFrame;
 	}
 
-	public static void main(String[] args) {
-		GreenGleeb g = new GreenGleeb(); 
-		for (int i = 0; i < 1000; i++) {
-			g.getNextFrame();
-		}
-	}
 }
