@@ -20,7 +20,7 @@ import javax.swing.Timer;
 import Creatures.CreatureList;
 import Creatures.CreatureNode;
 
-public class FightPanel extends JPanel implements MouseListener{
+public class FightPanel extends JPanel implements MouseListener {
 
 	// JPanels like to be serialized
 	private static final long serialVersionUID = 1L;
